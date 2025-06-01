@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Skill Compatibility Quiz</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap" rel="stylesheet"/>
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(to bottom right, #e0e7ff, #fce7f3);
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+    h1 {
+      color: #4f46e5;
+      font-size: 2rem;
+    }
+    p {
+      color: #555;
+      margin-bottom: 1rem;
+    }
+    .emoji-row {
+      font-size: 2rem;
+      margin: 1rem 0;
+    }
+    .btn {
+      margin-top: 1rem;
+      padding: 0.8rem 1.6rem;
+      background: linear-gradient(to right, #6366f1, #a855f7);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .option {
+      display: block;
+      background: #e0e7ff;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 0.5rem;
+      margin: 0.5rem 0;
+      cursor: pointer;
+      font-size: 1rem;
+      text-align: left;
+      transition: background 0.2s;
+    }
+    .option:hover {
+      background: #c7d2fe;
+    }
+    .btn-next {
+      margin-top: 1rem;
+      padding: 0.7rem 1.5rem;
+      background: linear-gradient(to right, #6366f1, #a855f7);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .result {
+      text-align: center;
+      font-size: 1.3rem;
+      color: #4f46e5;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="landing">
+    <h1>Welcome to SkillQuest!</h1>
+    <p>Answer 20 quick questions to discover which life skill you're most compatible with.</p>
+    <div class="emoji-row">🧠 🔧 💰 💪</div>
+    <p>Mental Fitness, DIY & Repairs, Finance, and Health</p>
+    <button class="btn" onclick="startQuiz()">Start Quiz</button>
+  </div>
+
+  <div class="container" id="quiz" style="display:none;">
+    <h2 id="question-title">Loading...</h2>
+    <div id="options"></div>
+    <button class="btn-next" onclick="nextQuestion()">Next</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const questions = [
+      { skill: "Mental Fitness", q: "What boosts memory best?", options: ["Junk food", "Visualization", "Skipping sleep", "None"], answer: 1 },
+      { skill: "Mental Fitness", q: "Which activity relieves stress?", options: ["Meditation", "Arguing", "Binge-watching", "Overthinking"], answer: 0 },
+      { skill: "Mental Fitness", q: "How to improve focus?", options: ["Multi-tasking", "Frequent breaks", "Caffeine only", "Scrolling apps"], answer: 1 },
+      { skill: "Mental Fitness", q: "Which game improves logic?", options: ["Chess", "Dice", "Roulette", "Cards"], answer: 0 },
+      { skill: "Mental Fitness", q: "Best brain exercise?", options: ["Netflix", "Reading", "Yelling", "Gaming"], answer: 1 },
+      { skill: "DIY & Repairs", q: "Tool to hammer nails?", options: ["Screwdriver", "Wrench", "Hammer", "Tape"], answer: 2 },
+      { skill: "DIY & Repairs", q: "What seals window gaps?", options: ["Caulk", "Glue", "Paint", "Tape"], answer: 0 },
+      { skill: "DIY & Repairs", q: "Tool to tighten bolts?", options: ["Knife", "Pliers", "Wrench", "Drill"], answer: 2 },
+      { skill: "DIY & Repairs", q: "What prepares a wall for painting?", options: ["Sand", "Nails", "Soap", "Paint"], answer: 0 },
+      { skill: "DIY & Repairs", q: "To measure length?", options: ["Ruler", "Pencil", "Wrench", "Nail"], answer: 0 },
+      { skill: "Finance", q: "What is budgeting?", options: ["Random spending", "Expense planning", "Shopping", "Donating"], answer: 1 },
+      { skill: "Finance", q: "Best saving tool?", options: ["Credit card", "Wallet", "Emergency fund", "Loan"], answer: 2 },
+      { skill: "Finance", q: "What are stocks?", options: ["Spending", "Investment", "Bills", "Fees"], answer: 1 },
+      { skill: "Finance", q: "Track expenses how?", options: ["Notebook", "Guesswork", "Receipts", "Budget app"], answer: 3 },
+      { skill: "Finance", q: "What is interest?", options: ["Gift", "Loan", "Borrow cost", "Bonus"], answer: 2 },
+      { skill: "Health", q: "Best hydration?", options: ["Soda", "Coffee", "Water", "Juice"], answer: 2 },
+      { skill: "Health", q: "Daily step goal?", options: ["2k", "5k", "10k", "20k"], answer: 2 },
+      { skill: "Health", q: "Vitamin from sun?", options: ["A", "B12", "D", "C"], answer: 2 },
+      { skill: "Health", q: "Balanced diet has?", options: ["Only carbs", "Meat & bread", "Protein, fat, carbs, veg", "Fruit only"], answer: 2 },
+      { skill: "Health", q: "Cardio example?", options: ["Lifting", "Stretching", "Running", "Yoga"], answer: 2 }
+    ];
+    let current = 0;
+    const answers = [];
+    const scores = { "Mental Fitness": 0, "DIY & Repairs": 0, "Finance": 0, "Health": 0 };
+    function startQuiz() {
+      document.getElementById("landing").style.display = "none";
+      document.getElementById("quiz").style.display = "block";
+      showQuestion();
+    }
+    function showQuestion() {
+      const q = questions[current];
+      document.getElementById("question-title").textContent = `Q${current + 1}: ${q.q}`;
+      const opts = q.options.map((opt, i) =>
+        `<button class="option" onclick="selectAnswer(${i})">${opt}</button>`
+      ).join("");
+      document.getElementById("options").innerHTML = opts;
+      document.getElementById("result").textContent = "";
+    }
+    function selectAnswer(index) {
+      answers[current] = index;
+      const q = questions[current];
+      if (index === q.answer) scores[q.skill]++;
+      const btns = document.querySelectorAll('.option');
+      btns.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === q.answer) btn.classList.add('correct');
+        else if (i === index) btn.classList.add('wrong');
+      });
+    }
+    function nextQuestion() {
+      if (answers[current] == null) {
+        alert("Please select an answer first.");
+        return;
+      }
+      current++;
+      if (current < questions.length) {
+        showQuestion();
+      } else {
+        showResult();
+      }
+    }
+    function showResult() {
+      let bestSkill = "None", max = 0;
+      for (let skill in scores) {
+        if (scores[skill] > max) {
+          max = scores[skill];
+          bestSkill = skill;
+        }
+      }
+      document.getElementById("quiz").innerHTML = `
+        <h2>You're most compatible with:</h2>
+        <div class="result"><strong>${bestSkill}</strong> 🎉</div>
+        <p>You answered ${max} out of 5 questions correctly in that category.</p>
+      `;
+    }
+  </script>
+</body>
+</html>
